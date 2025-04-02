@@ -102,9 +102,9 @@ def evaluate_model(trace, model, data):
     r2 = r2_score(y_actual, y_pred)
     mape = mean_absolute_percentage_error(y_actual, y_pred)
 
-    print(f"\n✅ RMSE: {rmse:.2f}")
-    print(f"✅ R²: {r2:.2f}")
-    print(f"✅ MAPE: {mape:.2%}")
+    print(f"\n RMSE: {rmse:.2f}")
+    print(f" R²: {r2:.2f}")
+    print(f" MAPE: {mape:.2%}")
 
     plt.figure(figsize=(8, 6))
     sns.scatterplot(x=y_actual, y=y_pred)
@@ -134,11 +134,11 @@ def main():
     parser.add_argument("--balance", type=str, help="Column to oversample by (e.g., 'region')", default="region")
     args = parser.parse_args()
 
-    print("📥 Loading data...")
+    print(" Loading data...")
     data = load_or_generate_data(args.data)
     X_cols = [col for col in data.columns if "_spend" in col]
 
-    print(f"⚖️ Oversampling by '{args.balance}'...")
+    print(f" Oversampling by '{args.balance}'...")
     data = oversample_data_by_metric(data, metric_col=args.balance)
 
     scaler = StandardScaler()
@@ -146,17 +146,17 @@ def main():
     data['sales'] = data['sales'].astype(np.float32)
     data['region_code'] = pd.Categorical(data['region']).codes
 
-    print("🧠 Building model with learnable adstock and saturation...")
+    print(" Building model with learnable adstock and saturation...")
     model = build_mmm_model_adstock_saturation(data, X_cols)
 
-    print("📈 Sampling...")
+    print("Sampling...")
     with model:
         trace = pm.sample(1000, tune=1000, chains=2, cores=1,
                           target_accept=0.95, init="adapt_diag", return_inferencedata=True)
 
-    print("📊 Evaluating model...")
+    print("Evaluating model...")
     evaluate_model(trace, model, data)
-    print("✅ Done.")
+    print("Done.")
 
 
 if __name__ == "__main__":
